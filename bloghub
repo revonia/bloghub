@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Revonia\BlogHub\Application;
+use Revonia\BlogHub\Hub;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Dotenv\Dotenv;
+
+
+$containerBuilder = new ContainerBuilder();
+
+$containerBuilder->register('dotenv', Dotenv::class);
+$containerBuilder->register('hub', Hub::class);
+
+$containerBuilder
+    ->register('app', Application::class)
+    ->addArgument(getcwd())
+    ->addArgument(new Reference('dotenv'))
+    ->addArgument(new Reference('hub'));
+
+$containerBuilder->get('app')->run();

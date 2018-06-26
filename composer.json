@@ -1,0 +1,32 @@
+{
+  "name": "revonia/bloghub",
+  "type": "library",
+  "license": "Apache License 2.0",
+  "authors": [
+    {
+      "name": "J.Wang",
+      "email": "revonia64@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Revonia\\BlogHub\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "bin": [
+    "bloghub"
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=7.1",
+    "roave/security-advisories": "dev-master",
+    "phpxmlrpc/phpxmlrpc": "^4.3",
+    "symfony/dotenv": "^4.1",
+    "symfony/dependency-injection": "^4.1",
+    "symfony/console": "^4.1",
+    "michelf/php-markdown": "^1.8"
+  }
+}
