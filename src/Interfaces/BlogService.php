@@ -4,7 +4,7 @@
 namespace Revonia\BlogHub\Interfaces;
 
 
-interface Service
+interface BlogService
 {
     public function create($data);
 

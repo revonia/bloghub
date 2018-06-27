@@ -14,12 +14,11 @@ class SyncCommand extends Command
     {
         $this->setName('sync')
             ->setDescription('Sync all your posts to enabled blog services');
-
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var Hub $hub */
-        $hub = $this->getApplication()->getHub();
+        $this->getApplication()->doBootstrap($input);
+
     }
 }

@@ -9,18 +9,19 @@ use Symfony\Component\Console\Application as Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Dotenv\Exception\PathException;
 
 class Application extends Console
 {
-    const NAME = 'BlogHub';
-    const VERSION = '0.0.1';
+    public const NAME = 'BlogHub';
+    public const VERSION = '0.0.1';
 
     /**
      * @var Dotenv
      */
-    private $dotEnv;
+    private $dotenv;
 
     /**
      * @var string
@@ -33,17 +34,25 @@ class Application extends Console
     private $hub;
 
     /**
-     * Application constructor.
-     * @param $dotEnv
-     * @param $workingDir
+     * @var ContainerBuilder
      */
-    public function __construct($workingDir, $dotEnv, $hub)
-    {
-        parent::__construct(static::NAME, static::VERSION);
+    private $container;
 
+    /**
+     * Application constructor.
+     * @param $workingDir
+     * @param $container
+     * @param $dotenv
+     * @param $hub
+     */
+    public function __construct($workingDir, $container, $dotenv, $hub)
+    {
         $this->workingDir = $workingDir;
-        $this->dotEnv = $dotEnv;
+        $this->container = $container;
+        $this->dotenv = $dotenv;
         $this->hub = $hub;
+
+        parent::__construct(static::NAME, static::VERSION);
 
         $this->configure();
 
@@ -59,20 +68,20 @@ class Application extends Console
         $def->addOptions([
             new InputOption(
                 '--env',
-                '-e',
+                '-E',
                 InputOption::VALUE_OPTIONAL,
                 'The environment to run command.',
                 ''
             ),
             new InputOption(
                 '--working-dir',
-                '-d',
+                '-D',
                 InputOption::VALUE_OPTIONAL,
                 'If specified, use the given directory as working directory.'
             ),
             new InputOption(
                 '--bootstrap',
-                '-b',
+                '-B',
                 InputOption::VALUE_OPTIONAL,
                 'If specified, bootstrap with the given php script.'
             ),
@@ -87,11 +96,11 @@ class Application extends Console
         $dotEnvFile = $this->workingDir . DIRECTORY_SEPARATOR . '.env';
         if ($env === null) {
             try {
-                $this->dotEnv->load($dotEnvFile);
+                $this->dotenv->load($dotEnvFile);
             } catch (PathException $e) {
             }
         } else {
-            $this->dotEnv->load($dotEnvFile . ".$env");
+            $this->dotenv->load($dotEnvFile . ".$env");
         }
     }
 
@@ -116,7 +125,13 @@ class Application extends Console
             $output->writeln('<comment>' . $e->getMessage() . '</comment>');
         }
 
+        return parent::doRun($input, $output);
+    }
+
+    public function doBootstrap(InputInterface $input)
+    {
         $hub = $this->hub;
+        $app = $this;
 
         include_once __DIR__ . '/bootstrap.php';
 
@@ -129,11 +144,21 @@ class Application extends Console
             }
         }
 
-        return parent::doRun($input, $output);
+        $hub->bootAll($this);
     }
 
     public function getHub()
     {
         return $this->hub;
+    }
+
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
+    public function getWorkingDir()
+    {
+        return $this->workingDir;
     }
 }

@@ -9,16 +9,16 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Dotenv\Dotenv;
 
+$container = new ContainerBuilder();
 
-$containerBuilder = new ContainerBuilder();
+$container->autowire(Dotenv::class, Dotenv::class);
+$container->autowire(Hub::class, Hub::class);
 
-$containerBuilder->register('dotenv', Dotenv::class);
-$containerBuilder->register('hub', Hub::class);
-
-$containerBuilder
-    ->register('app', Application::class)
+$container->register(Application::class, Application::class)
     ->addArgument(getcwd())
-    ->addArgument(new Reference('dotenv'))
-    ->addArgument(new Reference('hub'));
+    ->addArgument($container)
+    ->addArgument(new Reference(Dotenv::class))
+    ->addArgument(new Reference(Hub::class))
+    ->setAutowired(true);
 
-$containerBuilder->get('app')->run();
+$container->get(Application::class)->run();

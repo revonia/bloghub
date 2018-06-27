@@ -1,15 +1,13 @@
 <?php
 
 
-namespace Revonia\BlogHub\Services;
+namespace Revonia\BlogHub\BlogServices;
 
 
-use Revonia\BlogHub\Interfaces\Service;
+use Revonia\BlogHub\Interfaces\BlogService;
 
-class MarkdownHtml implements Service
+class CnblogsBlogService implements BlogService
 {
-
-    const MARKDOWN_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css';
 
     public function create($data)
     {
@@ -29,5 +27,10 @@ class MarkdownHtml implements Service
     public function delete($id)
     {
         // TODO: Implement delete() method.
+    }
+
+    public static function boot()
+    {
+        $a = 1;
     }
 }
