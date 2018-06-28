@@ -27,6 +27,7 @@
     "symfony/dependency-injection": "^4.1",
     "symfony/console": "^4.1",
     "michelf/php-markdown": "^1.8",
-    "symfony/filesystem": "^4.1"
+    "symfony/filesystem": "^4.1",
+    "symfony/finder": "^4.1"
   }
 }

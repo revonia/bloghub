@@ -2,6 +2,8 @@
 
 namespace Revonia\BlogHub;
 
+use Psr\Container\ContainerInterface;
+
 class Hub
 {
     private $blogServices = [];
@@ -19,16 +21,26 @@ class Hub
         $this->transformers[$name] = $class;
     }
 
-    public function bootAll(Application $app)
+    public function getEnabled()
     {
-        $env = Env::select([
-            'BLOG_HUB_ENABLED_BLOG_SERVICES' => required(),
-            'BLOG_HUB_ENABLED_TRANSFORMERS' => '',
+        return $this->enabled;
+    }
+
+    public function resolveBlogService(ContainerInterface $container, $name)
+    {
+        return $container->get($this->blogServices[$name]);
+    }
+
+    public function bootAll(Application $app, Env $env)
+    {
+        $env->setDefaults([
+            'ENABLED_BLOG_SERVICES' => required(),
+            'ENABLED_TRANSFORMERS' => 'raw',
         ]);
 
         $this->enabled = [
-            'blogServices' => explode(',', $env['BLOG_HUB_ENABLED_BLOG_SERVICES']),
-            'transformers' => explode(',', $env['BLOG_HUB_ENABLED_TRANSFORMERS']),
+            'blogServices' => explode(',', $env['ENABLED_BLOG_SERVICES']),
+            'transformers' => explode(',', $env['ENABLED_TRANSFORMERS']),
         ];
 
         foreach (['blogServices', 'transformers'] as $map) {
@@ -36,6 +48,11 @@ class Hub
                 if (!in_array($name, $this->enabled[$map])) {
                     continue;
                 }
+                $app->getContainer()
+                    ->autowire($class)
+                    ->setShared(false)
+                    ->setPublic(true);
+
                 $boot = [$class, 'boot'];
                 if (is_callable($boot)) {
                     call_method_with_injection($app->getContainer(), $class, 'boot');

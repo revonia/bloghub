@@ -38,25 +38,43 @@ class Application extends Console
      */
     private $container;
 
+    private $registeredCommands = [];
+
+    /**
+     * @var Env
+     */
+    private $env;
+
     /**
      * Application constructor.
      * @param ContainerBuilder $container
      * @param Dotenv $dotenv
      * @param Hub $hub
+     * @throws \Exception
      */
-    public function __construct(ContainerBuilder $container, Dotenv $dotenv, Hub $hub)
+    public function __construct(ContainerBuilder $container, Dotenv $dotenv, Hub $hub, Env $env)
     {
         $this->container = $container;
         $this->dotenv = $dotenv;
         $this->hub = $hub;
+        $this->env = $env;
 
         parent::__construct(static::NAME, static::VERSION);
 
         $this->configure();
 
-        $this->addCommands([
-            new SyncCommand(),
+        $this->registerCommandsWithAutowire([
+            SyncCommand::class,
         ]);
+    }
+
+    public function registerCommandsWithAutowire(array $commandClasses)
+    {
+        foreach ($commandClasses as $commandClass) {
+            $this->container->autowire($commandClass)
+                ->setPublic(true);
+            $this->registeredCommands[] = $commandClass;
+        }
     }
 
     public function setWorkingDir($workingDir)
@@ -128,6 +146,11 @@ class Application extends Console
         }
 
         $this->doBootstrap($input);
+
+        foreach ($this->registeredCommands as $commandClass) {
+            $this->add($this->container->get($commandClass));
+        }
+
         return parent::doRun($input, $output);
     }
 
@@ -135,19 +158,20 @@ class Application extends Console
     {
         $hub = $this->hub;
         $app = $this;
+        $container = $this->container;
 
-        include_once __DIR__ . '/bootstrap.php';
+        include_once __DIR__ . DIRECTORY_SEPARATOR . 'bootstrap.php';
 
         if ($input->hasArgument('--bootstrap')) {
             $file = $input->getArgument('--bootstrap');
             if (is_readable($file)) {
                 include $file;
-            } else if (is_readable($this->workingDir . '/' . $file)) {
-                include $this->workingDir . '/' . $file;
+            } else if (is_readable($this->workingDir . DIRECTORY_SEPARATOR . $file)) {
+                include $this->workingDir . DIRECTORY_SEPARATOR . $file;
             }
         }
 
-        $hub->bootAll($this);
+        $hub->bootAll($this, $this->env);
         $this->container->compile();
     }
 

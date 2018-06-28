@@ -28,9 +28,4 @@ class CnblogsBlogService implements BlogService
     {
         // TODO: Implement delete() method.
     }
-
-    public static function boot()
-    {
-        $a = 1;
-    }
 }
