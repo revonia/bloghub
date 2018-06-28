@@ -18,7 +18,5 @@ class SyncCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->getApplication()->doBootstrap($input);
-
     }
 }

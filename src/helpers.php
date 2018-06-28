@@ -2,17 +2,18 @@
 
 namespace Revonia\BlogHub;
 
+use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
- * @param Container $container
+ * @param ContainerInterface $container
  * @param $class
  * @param $method
  * @param array $arguments
  * @return mixed
  * @throws \ReflectionException
  */
-function call_method_with_injection(Container $container, $class, $method, array $arguments = [])
+function call_method_with_injection(ContainerInterface $container, $class, $method, array $arguments = [])
 {
     $refection = new \ReflectionMethod($class, $method);
 
@@ -30,7 +31,7 @@ function call_method_with_injection(Container $container, $class, $method, array
             $args[] = $container->get($param->getClass()->getName());
         } catch (\Exception $e) {
             if (!isset($arguments[$name])) {
-                throw new \BadMethodCallException('Can not get argument');
+                throw new \BadMethodCallException('Can not get argument ' . $name . ' for ' . $class . '::' . $method);
             }
             $args[] = $arguments[$name];
         }

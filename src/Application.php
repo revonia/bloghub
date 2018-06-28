@@ -40,14 +40,12 @@ class Application extends Console
 
     /**
      * Application constructor.
-     * @param $workingDir
-     * @param $container
-     * @param $dotenv
-     * @param $hub
+     * @param ContainerBuilder $container
+     * @param Dotenv $dotenv
+     * @param Hub $hub
      */
-    public function __construct($workingDir, $container, $dotenv, $hub)
+    public function __construct(ContainerBuilder $container, Dotenv $dotenv, Hub $hub)
     {
-        $this->workingDir = $workingDir;
         $this->container = $container;
         $this->dotenv = $dotenv;
         $this->hub = $hub;
@@ -61,6 +59,11 @@ class Application extends Console
         ]);
     }
 
+    public function setWorkingDir($workingDir)
+    {
+        $this->workingDir = $workingDir;
+    }
+
     private function configure()
     {
         $def = $this->getDefinition();
@@ -70,8 +73,7 @@ class Application extends Console
                 '--env',
                 '-E',
                 InputOption::VALUE_OPTIONAL,
-                'The environment to run command.',
-                ''
+                'The environment to run command.'
             ),
             new InputOption(
                 '--working-dir',
@@ -100,7 +102,7 @@ class Application extends Console
             } catch (PathException $e) {
             }
         } else {
-            $this->dotenv->load($dotEnvFile . ".$env");
+            $this->dotenv->load($dotEnvFile, ["$dotEnvFile.$env"]);
         }
     }
 
@@ -125,6 +127,7 @@ class Application extends Console
             $output->writeln('<comment>' . $e->getMessage() . '</comment>');
         }
 
+        $this->doBootstrap($input);
         return parent::doRun($input, $output);
     }
 
@@ -145,6 +148,7 @@ class Application extends Console
         }
 
         $hub->bootAll($this);
+        $this->container->compile();
     }
 
     public function getHub()

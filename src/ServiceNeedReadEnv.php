@@ -32,6 +32,4 @@ trait ServiceNeedReadEnv
 
         return 'BLOG_HUB_' . strtoupper(str_snake($class)) . '_' . $name;
     }
-
-
 }

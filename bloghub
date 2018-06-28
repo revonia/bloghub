@@ -11,14 +11,17 @@ use Symfony\Component\Dotenv\Dotenv;
 
 $container = new ContainerBuilder();
 
-$container->autowire(Dotenv::class, Dotenv::class);
-$container->autowire(Hub::class, Hub::class);
+$container->setAlias(ContainerBuilder::class, 'service_container')
+    ->setPublic(true);
 
-$container->register(Application::class, Application::class)
-    ->addArgument(getcwd())
+$container->autowire(Dotenv::class, Dotenv::class)->setPublic(false);
+$container->autowire(Hub::class, Hub::class)->setPublic(true);
+
+$container->autowire(Application::class, Application::class)
     ->addArgument($container)
     ->addArgument(new Reference(Dotenv::class))
     ->addArgument(new Reference(Hub::class))
-    ->setAutowired(true);
+    ->addMethodCall('setWorkingDir', [getcwd()]);
+
 
 $container->get(Application::class)->run();

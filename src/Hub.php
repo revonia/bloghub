@@ -7,6 +7,8 @@ class Hub
     private $blogServices = [];
     private $transformers = [];
 
+    private $enabled = [];
+
     public function addBlogService($name, $class)
     {
         $this->blogServices[$name] = $class;
@@ -17,10 +19,6 @@ class Hub
         $this->transformers[$name] = $class;
     }
 
-    /**
-     * @param Application $app
-     * @throws \ReflectionException
-     */
     public function bootAll(Application $app)
     {
         $env = Env::select([
@@ -28,14 +26,14 @@ class Hub
             'BLOG_HUB_ENABLED_TRANSFORMERS' => '',
         ]);
 
-        $enables = [
+        $this->enabled = [
             'blogServices' => explode(',', $env['BLOG_HUB_ENABLED_BLOG_SERVICES']),
             'transformers' => explode(',', $env['BLOG_HUB_ENABLED_TRANSFORMERS']),
         ];
 
         foreach (['blogServices', 'transformers'] as $map) {
             foreach ($this->{$map} as $name => $class) {
-                if (!in_array($name, $enables[$map])) {
+                if (!in_array($name, $this->enabled[$map])) {
                     continue;
                 }
                 $boot = [$class, 'boot'];
